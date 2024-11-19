@@ -1,7 +1,11 @@
-from embedding_pipeline import EmbeddingPipeline
+from embedding_pipeline import SentenceTransformerModel
+from vector_db import QdrantDB
+from vector_search_system import VectorSearchSystem
 
-# Initialize the pipeline (it will use distilbert-base-uncased by default)
-pipeline = EmbeddingPipeline()
+# Initialize components
+embedding_model = SentenceTransformerModel('distilbert-base-uncased')
+vector_db = QdrantDB(dimension=768)  # distilbert's output dimension
+search_system = VectorSearchSystem(embedding_model, vector_db)
 
 # Add some example texts
 texts = [
@@ -12,12 +16,12 @@ texts = [
 ]
 
 # Add texts to the vector database
-pipeline.add_texts(texts)
+search_system.add_texts(texts)
 
 # Search for similar texts
 query = "AI and machine learning"
-results = pipeline.search(query, k=2)
+results = search_system.search(query, limit=2)
 
 # Print results
-for text, distance in zip(results["texts"], results["distances"]):
-    print(f"Distance: {distance:.4f} | Text: {text}")
+for result in results:
+    print(f"Distance: {result['score']:.4f} | Text: {result['text']}")
